@@ -31,3 +31,10 @@ func ConfigRequestExecuter(executer RequestExecuter) ClientConfig {
 		c.executer = executer
 	}
 }
+
+// ConfigDefault configures the client with default options to allow quick start
+func ConfigDefault() ClientConfig {
+	return func(c *Client) {
+		c.executer = http.DefaultClient
+	}
+}
