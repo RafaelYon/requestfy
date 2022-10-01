@@ -1,6 +1,14 @@
 package requestfy
 
-type Client struct{}
+import "net/http"
+
+type RequestExecuter interface {
+	Do(*http.Request) (*http.Response, error)
+}
+
+type Client struct {
+	executer RequestExecuter
+}
 
 type ClientConfig func(*Client)
 
@@ -12,4 +20,10 @@ func NewClient(configs ...ClientConfig) *Client {
 	}
 
 	return client
+}
+
+func ConfigRequestExecuter(executer RequestExecuter) ClientConfig {
+	return func(c *Client) {
+		c.executer = executer
+	}
 }
