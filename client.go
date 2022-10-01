@@ -10,6 +10,7 @@ type RequestExecuter interface {
 // Client Allows you to perform http requests with a simple syntax
 type Client struct {
 	executer RequestExecuter
+	baseURL  string
 }
 
 // ClientConfig is a function to configure the client
@@ -29,6 +30,13 @@ func NewClient(configs ...ClientConfig) *Client {
 func ConfigRequestExecuter(executer RequestExecuter) ClientConfig {
 	return func(c *Client) {
 		c.executer = executer
+	}
+}
+
+// ConfigBaseURL specifies a prefix, a base to apply to the URL of all client requests
+func ConfigBaseURL(baseURL string) ClientConfig {
+	return func(c *Client) {
+		c.baseURL = baseURL
 	}
 }
 
