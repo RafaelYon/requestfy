@@ -1,6 +1,11 @@
 package requestfy
 
-import "net/http"
+import (
+	"context"
+	"fmt"
+	"io"
+	"net/http"
+)
 
 // RequestExecuter abstracts the http client used behind the scenes to perform HTTP requests
 type RequestExecuter interface {
@@ -13,9 +18,6 @@ type Client struct {
 	baseURL  string
 }
 
-// ClientConfig is a function to configure the client
-type ClientConfig func(*Client)
-
 func NewClient(configs ...ClientConfig) *Client {
 	client := &Client{}
 
@@ -26,23 +28,38 @@ func NewClient(configs ...ClientConfig) *Client {
 	return client
 }
 
-// ConfigRequestExecuter allows you to specify an http request executor for the client
-func ConfigRequestExecuter(executer RequestExecuter) ClientConfig {
-	return func(c *Client) {
-		c.executer = executer
+// Request create a request with using the context.Background
+func (c *Client) Request() *Request {
+	return c.RequestWithContext(context.Background())
+}
+
+// RequestWithContext create a request with using the specified context
+func (c *Client) RequestWithContext(ctx context.Context) *Request {
+	return &Request{
+		client:  c,
+		context: ctx,
 	}
 }
 
-// ConfigBaseURL specifies a prefix, a base to apply to the URL of all client requests
-func ConfigBaseURL(baseURL string) ClientConfig {
-	return func(c *Client) {
-		c.baseURL = baseURL
+// newRequest creates a request and applies the client's configuration to this request
+func (c *Client) newRequest(ctx context.Context, url, method string, body io.Reader) (*http.Request, error) {
+	if len(c.baseURL) > 1 {
+		url = fmt.Sprintf("%s/%s", c.baseURL, url)
 	}
+
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, fmt.Errorf("can't create %s request to '%s': %w", method, url, err)
+	}
+
+	return req, nil
 }
 
-// ConfigDefault configures the client with default options to allow quick start
-func ConfigDefault() ClientConfig {
-	return func(c *Client) {
-		c.executer = http.DefaultClient
+func (c *Client) doRequest(req *http.Request) (*http.Response, error) {
+	res, err := c.executer.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("can't execute %s request to '%s': %w", req.Method, req.URL, err)
 	}
+
+	return res, nil
 }
