@@ -2,6 +2,7 @@ package requestfy
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 )
 
@@ -35,4 +36,12 @@ func (c *Client) RequestWithContext(ctx context.Context) *Request {
 		client:  c,
 		context: ctx,
 	}
+}
+
+func (c *Client) concatURL(path string) string {
+	if len(c.baseURL) < 1 {
+		return path
+	}
+
+	return fmt.Sprintf("%s%s", c.baseURL, path)
 }
