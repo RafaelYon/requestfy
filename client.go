@@ -1,6 +1,9 @@
 package requestfy
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
 // RequestExecuter abstracts the http client used behind the scenes to perform HTTP requests
 type RequestExecuter interface {
@@ -44,5 +47,16 @@ func ConfigBaseURL(baseURL string) ClientConfig {
 func ConfigDefault() ClientConfig {
 	return func(c *Client) {
 		c.executer = http.DefaultClient
+	}
+}
+
+func (c *Client) Request() *Request {
+	return c.RequestWithContext(context.Background())
+}
+
+func (c *Client) RequestWithContext(ctx context.Context) *Request {
+	return &Request{
+		client:  c,
+		context: ctx,
 	}
 }
