@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 // RequestExecuter abstracts the http client used behind the scenes to perform HTTP requests
@@ -16,6 +17,7 @@ type RequestExecuter interface {
 type Client struct {
 	executer RequestExecuter
 	baseURL  string
+	timeout  time.Duration
 }
 
 func NewClient(configs ...ClientConfig) *Client {
