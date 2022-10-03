@@ -3,6 +3,7 @@ package requestfy
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -38,10 +39,24 @@ func (c *Client) RequestWithContext(ctx context.Context) *Request {
 	}
 }
 
-func (c *Client) concatURL(path string) string {
-	if len(c.baseURL) < 1 {
-		return path
+func (c *Client) newRequest(ctx context.Context, url, method string, body io.Reader) (*http.Request, error) {
+	if len(c.baseURL) > 1 {
+		url = fmt.Sprintf("%s/%s", c.baseURL, url)
 	}
 
-	return fmt.Sprintf("%s%s", c.baseURL, path)
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, fmt.Errorf("can't create %s request to '%s': %w", method, url, err)
+	}
+
+	return req, nil
+}
+
+func (c *Client) doRequest(req *http.Request) (*http.Response, error) {
+	res, err := c.executer.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("can't execute %s request to '%s': %w", req.Method, req.URL, err)
+	}
+
+	return res, nil
 }
