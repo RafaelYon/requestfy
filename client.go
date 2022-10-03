@@ -16,9 +16,6 @@ type Client struct {
 	baseURL  string
 }
 
-// ClientConfig is a function to configure the client
-type ClientConfig func(*Client)
-
 func NewClient(configs ...ClientConfig) *Client {
 	client := &Client{}
 
@@ -27,27 +24,6 @@ func NewClient(configs ...ClientConfig) *Client {
 	}
 
 	return client
-}
-
-// ConfigRequestExecuter allows you to specify an http request executor for the client
-func ConfigRequestExecuter(executer RequestExecuter) ClientConfig {
-	return func(c *Client) {
-		c.executer = executer
-	}
-}
-
-// ConfigBaseURL specifies a prefix, a base to apply to the URL of all client requests
-func ConfigBaseURL(baseURL string) ClientConfig {
-	return func(c *Client) {
-		c.baseURL = baseURL
-	}
-}
-
-// ConfigDefault configures the client with default options to allow quick start
-func ConfigDefault() ClientConfig {
-	return func(c *Client) {
-		c.executer = http.DefaultClient
-	}
 }
 
 func (c *Client) Request() *Request {
