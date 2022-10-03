@@ -28,10 +28,12 @@ func NewClient(configs ...ClientConfig) *Client {
 	return client
 }
 
+// Request create a request with using the context.Background
 func (c *Client) Request() *Request {
 	return c.RequestWithContext(context.Background())
 }
 
+// RequestWithContext create a request with using the specified context
 func (c *Client) RequestWithContext(ctx context.Context) *Request {
 	return &Request{
 		client:  c,
@@ -39,6 +41,7 @@ func (c *Client) RequestWithContext(ctx context.Context) *Request {
 	}
 }
 
+// newRequest creates a request and applies the client's configuration to this request
 func (c *Client) newRequest(ctx context.Context, url, method string, body io.Reader) (*http.Request, error) {
 	if len(c.baseURL) > 1 {
 		url = fmt.Sprintf("%s/%s", c.baseURL, url)
