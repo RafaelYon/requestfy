@@ -38,6 +38,20 @@ func TestDelete(t *testing.T) {
 	})
 }
 
+func TestPatch(t *testing.T) {
+	t.Run("should make a head http request", func(t *testing.T) {
+		spy := &spyRequestExecutor{}
+
+		cli := requestfy.NewClient(
+			requestfy.ConfigRequestExecuter(spy),
+			requestfy.ConfigBaseURL("http://some-cool-domain.local"),
+		)
+
+		res, err := cli.Request().Head("bar/foo")
+		assertRequestMethod(t, spy, res, err, http.MethodHead)
+	})
+}
+
 type spyRequestExecutor struct {
 	lastRequest *http.Request
 }
