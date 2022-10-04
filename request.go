@@ -20,3 +20,12 @@ func (r *Request) Get(url string) (*http.Response, error) {
 
 	return r.client.doRequest(req)
 }
+
+func (r *Request) Delete(url string) (*http.Response, error) {
+	req, err := r.client.newRequest(r.context, url, http.MethodDelete, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.client.doRequest(req)
+}
