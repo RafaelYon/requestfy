@@ -13,7 +13,7 @@ type Request struct {
 }
 
 // Get performs a request using the GET method
-func (r *Request) Get(url string) (*http.Response, error) {
+func (r *Request) Get(url string) (*Response, error) {
 	req, err := r.client.newRequest(r.context, url, http.MethodGet, nil)
 	if err != nil {
 		return nil, err
@@ -28,6 +28,7 @@ func (r *Request) Get(url string) (*http.Response, error) {
 	return r.client.doRequest(req)
 }
 
+
 func (r *Request) SetHeader(h, v string) *Request {
 	r.headers[h] = append(r.headers[h], v)
 
@@ -38,8 +39,18 @@ func (r *Request) GetHeaders() http.Header {
 	return r.headers
 }
 
-func (r *Request) Delete(url string) (*http.Response, error) {
+func (r *Request) Delete(url string) (*Response, error) {
+
 	req, err := r.client.newRequest(r.context, url, http.MethodDelete, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.client.doRequest(req)
+}
+
+func (r *Request) Head(url string) (*Response, error) {
+	req, err := r.client.newRequest(r.context, url, http.MethodHead, nil)
 	if err != nil {
 		return nil, err
 	}

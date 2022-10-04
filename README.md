@@ -27,3 +27,26 @@ client := requestfy.NewClient(
 ```go
 res, err := client.Request().Get("people/1/")
 ```
+
+## Configuration
+
+### Replacing JSON decoder
+When starting the client with the default configuration (`requestfy.ConfigDefault()`) [json.Decoder](https://pkg.go.dev/encoding/json#Decoder) is used.
+
+To replace `json.Decoder` with another implementation it is necessary to specify the decoder constructor during the creation of the client with the option `ConfigJsonDecoder`.
+
+#### Using go-json
+To use [go-json](https://github.com/goccy/go-json) just "teach" the client how to build the new decoder:
+
+```go
+import "github.com/goccy/go-json"
+
+func main() {
+    client := client := requestfy.NewClient(
+        requestfy.ConfigDefault(), // Using "ConfigDefault" is optional and its settings may be overwritten by subsequent settings
+        requestfy.ConfigJsonDecoder(func(r io.Reader) requestfy.Decoder {
+            return json.NewDecoder(r)
+        })
+    )
+}
+```

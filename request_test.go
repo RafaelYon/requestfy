@@ -1,29 +1,15 @@
 package requestfy_test
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/RafaelYon/requestfy"
 )
 
-func TestGet(t *testing.T) {
-	t.Run("should concatenate base and specified URL", func(t *testing.T) {
-		spy := &spyRequestExecutor{}
-		client := requestfy.NewClient(
-			requestfy.ConfigRequestExecuter(spy),
-			requestfy.ConfigBaseURL("http://some-cool-domain.local"),
-		)
-
-		res, err := client.Request().Get("cool/path")
-		assertRequestMethod(t, spy, res, err, http.MethodGet)
-
-		if expected, used := "http://some-cool-domain.local/cool/path", spy.lastRequest.URL.String(); used != expected {
-			t.Errorf("expected '%s' URL, used '%s'", expected, used)
-		}
-	})
-}
-
+const fakeURL = "http://some-cool-domain.local"
+const path = "cool/path"
 
 func TestHeaders(t *testing.T) {
 	t.Run("should add headers to request", func(t *testing.T) {
@@ -58,27 +44,43 @@ func TestHeaders(t *testing.T) {
 	})
 }
 
-func TestDelete(t *testing.T) {
-	t.Run("should make a delete http request", func(t *testing.T) {
-		spy := &spyRequestExecutor{}
 
-		cli := requestfy.NewClient(
-			requestfy.ConfigRequestExecuter(spy),
-			requestfy.ConfigBaseURL("http://some-cool-domain.local"),
-		)
-
-		res, err := cli.Request().Delete("bar/foo")
-		assertRequestMethod(t, spy, res, err, http.MethodDelete)
-	})
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
+func TestRequests(t *testing.T) {
+	testCases := []struct {
+		expectedMethod string
+		method         func(*requestfy.Request) func(string) (*requestfy.Response, error)
+	}{
+		{
+			http.MethodGet,
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
+				return r.Get
+			},
+		},
+		{
+			http.MethodDelete,
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
+				return r.Delete
+			},
+		},
+		{
+			http.MethodHead,
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
+				return r.Head
+			},
+		},
 	}
-	return false
+	for _, test := range testCases {
+		t.Run(fmt.Sprintf("should make %s http request", test.expectedMethod), func(t *testing.T) {
+			spy := &spyRequestExecutor{}
+			client := requestfy.NewClient(
+				requestfy.ConfigRequestExecuter(spy),
+				requestfy.ConfigBaseURL(fakeURL),
+			)
+
+			res, err := test.method(client.Request())(path)
+			assertRequestMethod(t, spy, res, err, test.expectedMethod)
+		})
+	}
 }
 
 type spyRequestExecutor struct {
@@ -96,7 +98,7 @@ func (s *spyRequestExecutor) Do(req *http.Request) (*http.Response, error) {
 func assertRequestMethod(
 	t *testing.T,
 	spy *spyRequestExecutor,
-	res *http.Response,
+	res *requestfy.Response,
 	err error,
 	expectedMethod string,
 ) {
@@ -121,4 +123,13 @@ func assertRequestMethod(
 	if spy.lastRequest.Method != expectedMethod {
 		t.Errorf("expected '%s' method, used '%s'", expectedMethod, spy.lastRequest.Method)
 	}
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
