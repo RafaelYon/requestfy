@@ -14,23 +14,23 @@ const path = "cool/path"
 func TestRequests(t *testing.T) {
 	testCases := []struct {
 		expectedMethod string
-		method         func(*requestfy.Request) func(string) (*http.Response, error)
+		method         func(*requestfy.Request) func(string) (*requestfy.Response, error)
 	}{
 		{
 			http.MethodGet,
-			func(r *requestfy.Request) func(string) (*http.Response, error) {
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
 				return r.Get
 			},
 		},
 		{
 			http.MethodDelete,
-			func(r *requestfy.Request) func(string) (*http.Response, error) {
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
 				return r.Delete
 			},
 		},
 		{
 			http.MethodHead,
-			func(r *requestfy.Request) func(string) (*http.Response, error) {
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
 				return r.Head
 			},
 		},
