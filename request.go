@@ -37,3 +37,12 @@ func (r *Request) SetHeader(h, v string) *Request {
 func (r *Request) GetHeaders() http.Header {
 	return r.headers
 }
+
+func (r *Request) Delete(url string) (*http.Response, error) {
+	req, err := r.client.newRequest(r.context, url, http.MethodDelete, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.client.doRequest(req)
+}

@@ -16,31 +16,14 @@ func TestGet(t *testing.T) {
 		)
 
 		res, err := client.Request().Get("cool/path")
-		if err != nil {
-			t.Fatalf("expected no error, received '%s'", err)
-		}
-
-		if res == nil {
-			t.Fatalf("expected non nil *http.Response, received nil")
-		}
-
-		if spy.lastRequest == nil {
-			t.Fatalf("expected non nil *http.Request, received nil")
-		}
-
-		if res.StatusCode != http.StatusOK {
-			t.Errorf("expected 200 Status Code, received '%d'", res.StatusCode)
-		}
-
-		if spy.lastRequest.Method != http.MethodGet {
-			t.Errorf("expected '%s' method, used '%s'", http.MethodGet, spy.lastRequest.Method)
-		}
+		assertRequestMethod(t, spy, res, err, http.MethodGet)
 
 		if expected, used := "http://some-cool-domain.local/cool/path", spy.lastRequest.URL.String(); used != expected {
 			t.Errorf("expected '%s' URL, used '%s'", expected, used)
 		}
 	})
 }
+
 
 func TestHeaders(t *testing.T) {
 	t.Run("should add headers to request", func(t *testing.T) {
@@ -71,7 +54,21 @@ func TestHeaders(t *testing.T) {
 					t.Error("headers are not equals")
 				}
 			}
-		}
+    	}
+	})
+}
+
+func TestDelete(t *testing.T) {
+	t.Run("should make a delete http request", func(t *testing.T) {
+		spy := &spyRequestExecutor{}
+
+		cli := requestfy.NewClient(
+			requestfy.ConfigRequestExecuter(spy),
+			requestfy.ConfigBaseURL("http://some-cool-domain.local"),
+		)
+
+		res, err := cli.Request().Delete("bar/foo")
+		assertRequestMethod(t, spy, res, err, http.MethodDelete)
 	})
 }
 
@@ -94,4 +91,34 @@ func (s *spyRequestExecutor) Do(req *http.Request) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: http.StatusOK,
 	}, nil
+}
+
+func assertRequestMethod(
+	t *testing.T,
+	spy *spyRequestExecutor,
+	res *http.Response,
+	err error,
+	expectedMethod string,
+) {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("expected no error, received '%s'", err)
+	}
+
+	if res == nil {
+		t.Fatalf("expected non nil *http.Response, received nil")
+	}
+
+	if spy.lastRequest == nil {
+		t.Fatalf("expected non nil *http.Request, received nil")
+	}
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("expected 200 Status Code, received '%d'", res.StatusCode)
+	}
+
+	if spy.lastRequest.Method != expectedMethod {
+		t.Errorf("expected '%s' method, used '%s'", expectedMethod, spy.lastRequest.Method)
+	}
 }
