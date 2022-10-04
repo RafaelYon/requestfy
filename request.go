@@ -9,7 +9,7 @@ import (
 type Request struct {
 	context context.Context
 	client  *Client
-	headers map[string]string
+	headers http.Header
 }
 
 // Get performs a request using the GET method
@@ -19,8 +19,8 @@ func (r *Request) Get(url string) (*http.Response, error) {
 		return nil, err
 	}
 
-	if len(r.headers) > 0 {
-		for key, val := range r.headers {
+	for key, headers := range r.headers {
+		for _, val := range headers {
 			req.Header.Add(key, val)
 		}
 	}
@@ -29,11 +29,11 @@ func (r *Request) Get(url string) (*http.Response, error) {
 }
 
 func (r *Request) SetHeader(h, v string) *Request {
-	r.headers[h] = v
+	r.headers[h] = append(r.headers[h], v)
 
 	return r
 }
 
-func (r *Request) GetHeaders() map[string]string {
+func (r *Request) GetHeaders() http.Header {
 	return r.headers
 }

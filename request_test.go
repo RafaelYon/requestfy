@@ -46,29 +46,42 @@ func TestHeaders(t *testing.T) {
 	t.Run("should add headers to request", func(t *testing.T) {
 		cli := requestfy.NewClient()
 
-		headers := map[string]string{
-			"bar":  "foo",
-			"cool": "header",
+		testHeaders := map[string][]string{
+			"bar":  []string{"foo"},
+			"cool": []string{"header", "value"},
 		}
 
 		r := cli.Request()
 
-		for k, v := range headers {
-			r.SetHeader(k, v)
+		for k, headers := range testHeaders {
+			for _, header := range headers {
+				r.SetHeader(k, header)
+			}
 		}
 
-		for k, v := range r.GetHeaders() {
-			aimVal, ok := headers[k]
+		for k, wantedHeaders := range testHeaders {
+			currentHeaders, ok := r.GetHeaders()[k]
 
 			if !ok {
-				t.Errorf("cannot find value for %s", k)
+				t.Errorf("cannot value for %s key header", k)
 			}
 
-			if aimVal != v {
-				t.Errorf("value %s is not equal to %s", aimVal, v)
+			for _, wantedHeader := range wantedHeaders {
+				if !contains(currentHeaders, wantedHeader) {
+					t.Error("headers are not equals")
+				}
 			}
 		}
 	})
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 type spyRequestExecutor struct {
