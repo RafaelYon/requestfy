@@ -36,7 +36,7 @@ When starting the client with the default configuration (`requestfy.ConfigDefaul
 To replace `json.Decoder` with another implementation it is necessary to specify the do constructor during the creation of the client with the option `ConfigJsonDecoder`.
 
 #### Using go-json
-To use "[go-json](https://github.com/goccy/go-json)" just "teach" the client how to build the new decoder:
+To use [go-json](https://github.com/goccy/go-json) just "teach" the client how to build the new decoder:
 
 ```go
 import "github.com/goccy/go-json"
