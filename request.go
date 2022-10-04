@@ -22,7 +22,7 @@ func (r *Request) Get(url string) (*Response, error) {
 	return r.client.doRequest(req)
 }
 
-// Get performs a request using the GET method
+// Post performs a request using the POST method
 func (r *Request) Post(url string, body io.Reader) (*Response, error) {
 	req, err := r.client.newRequest(r.context, url, http.MethodPost, nil)
 	if err != nil {
