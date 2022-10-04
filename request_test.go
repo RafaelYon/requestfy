@@ -1,41 +1,52 @@
 package requestfy_test
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/RafaelYon/requestfy"
 )
 
-func TestGet(t *testing.T) {
-	t.Run("should concatenate base and specified URL", func(t *testing.T) {
-		spy := &spyRequestExecutor{}
-		client := requestfy.NewClient(
-			requestfy.ConfigRequestExecuter(spy),
-			requestfy.ConfigBaseURL("http://some-cool-domain.local"),
-		)
+const fakeURL = "http://some-cool-domain.local"
+const path = "cool/path"
 
-		res, err := client.Request().Get("cool/path")
-		assertRequestMethod(t, spy, res, err, http.MethodGet)
+func TestRequests(t *testing.T) {
+	testCases := []struct {
+		expectedMethod string
+		method         func(*requestfy.Request) func(string) (*http.Response, error)
+	}{
+		{
+			http.MethodGet,
+			func(r *requestfy.Request) func(string) (*http.Response, error) {
+				return r.Get
+			},
+		},
+		{
+			http.MethodDelete,
+			func(r *requestfy.Request) func(string) (*http.Response, error) {
+				return r.Delete
+			},
+		},
+		{
+			http.MethodHead,
+			func(r *requestfy.Request) func(string) (*http.Response, error) {
+				return r.Head
+			},
+		},
+	}
+	for _, test := range testCases {
+		t.Run(fmt.Sprintf("should make %s http request", test.expectedMethod), func(t *testing.T) {
+			spy := &spyRequestExecutor{}
+			client := requestfy.NewClient(
+				requestfy.ConfigRequestExecuter(spy),
+				requestfy.ConfigBaseURL(fakeURL),
+			)
 
-		if expected, used := "http://some-cool-domain.local/cool/path", spy.lastRequest.URL.String(); used != expected {
-			t.Errorf("expected '%s' URL, used '%s'", expected, used)
-		}
-	})
-}
-
-func TestDelete(t *testing.T) {
-	t.Run("should make a delete http request", func(t *testing.T) {
-		spy := &spyRequestExecutor{}
-
-		cli := requestfy.NewClient(
-			requestfy.ConfigRequestExecuter(spy),
-			requestfy.ConfigBaseURL("http://some-cool-domain.local"),
-		)
-
-		res, err := cli.Request().Delete("bar/foo")
-		assertRequestMethod(t, spy, res, err, http.MethodDelete)
-	})
+			res, err := test.method(client.Request())(path)
+			assertRequestMethod(t, spy, res, err, test.expectedMethod)
+		})
+	}
 }
 
 type spyRequestExecutor struct {
