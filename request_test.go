@@ -42,6 +42,7 @@ func TestGet(t *testing.T) {
 	})
 }
 
+
 func TestHeaders(t *testing.T) {
 	t.Run("should add headers to request", func(t *testing.T) {
 		cli := requestfy.NewClient()
@@ -67,6 +68,39 @@ func TestHeaders(t *testing.T) {
 			if aimVal != v {
 				t.Errorf("value %s is not equal to %s", aimVal, v)
 			}
+    	}
+	})
+}
+
+func TestDelete(t *testing.T) {
+	t.Run("should make a delete http request", func(t *testing.T) {
+		spy := &spyRequestExecutor{}
+
+		cli := requestfy.NewClient(
+			requestfy.ConfigRequestExecuter(spy),
+			requestfy.ConfigBaseURL("http://some-cool-domain.local"),
+		)
+
+		res, err := cli.Request().Delete("bar/foo")
+		if err != nil {
+			t.Fatalf("expected no error, received '%s'", err)
+		}
+
+		if res == nil {
+			t.Fatalf("expected non nil *http.Response, received nil")
+		}
+
+		if spy.lastRequest == nil {
+			t.Fatalf("expected non nil *http.Request, received nil")
+		}
+
+		if res.StatusCode != http.StatusOK {
+			t.Errorf("expected 200 Status Code, received '%d'", res.StatusCode)
+		}
+
+		if spy.lastRequest.Method != http.MethodDelete {
+			t.Errorf("expected '%s' method, used '%s'", http.MethodGet, spy.lastRequest.Method)
+
 		}
 	})
 }
