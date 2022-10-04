@@ -42,6 +42,35 @@ func TestGet(t *testing.T) {
 	})
 }
 
+func TestHeaders(t *testing.T) {
+	t.Run("should add headers to request", func(t *testing.T) {
+		cli := requestfy.NewClient()
+
+		headers := map[string]string{
+			"bar":  "foo",
+			"cool": "header",
+		}
+
+		r := cli.Request()
+
+		for k, v := range headers {
+			r.SetHeader(k, v)
+		}
+
+		for k, v := range r.GetHeaders() {
+			aimVal, ok := headers[k]
+
+			if !ok {
+				t.Errorf("cannot find value for %s", k)
+			}
+
+			if aimVal != v {
+				t.Errorf("value %s is not equal to %s", aimVal, v)
+			}
+		}
+	})
+}
+
 type spyRequestExecutor struct {
 	lastRequest *http.Request
 }

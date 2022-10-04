@@ -38,6 +38,7 @@ func (c *Client) RequestWithContext(ctx context.Context) *Request {
 	return &Request{
 		client:  c,
 		context: ctx,
+		headers: make(map[string]string),
 	}
 }
 
