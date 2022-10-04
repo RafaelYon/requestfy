@@ -53,7 +53,7 @@ func (s *spyRequestExecutor) Do(req *http.Request) (*http.Response, error) {
 func assertRequestMethod(
 	t *testing.T,
 	spy *spyRequestExecutor,
-	res *http.Response,
+	res *requestfy.Response,
 	err error,
 	expectedMethod string,
 ) {

@@ -12,7 +12,7 @@ type Request struct {
 }
 
 // Get performs a request using the GET method
-func (r *Request) Get(url string) (*http.Response, error) {
+func (r *Request) Get(url string) (*Response, error) {
 	req, err := r.client.newRequest(r.context, url, http.MethodGet, nil)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func (r *Request) Get(url string) (*http.Response, error) {
 	return r.client.doRequest(req)
 }
 
-func (r *Request) Delete(url string) (*http.Response, error) {
+func (r *Request) Delete(url string) (*Response, error) {
 	req, err := r.client.newRequest(r.context, url, http.MethodDelete, nil)
 	if err != nil {
 		return nil, err

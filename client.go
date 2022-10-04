@@ -55,11 +55,17 @@ func (c *Client) newRequest(ctx context.Context, url, method string, body io.Rea
 	return req, nil
 }
 
-func (c *Client) doRequest(req *http.Request) (*http.Response, error) {
+func (c *Client) doRequest(req *http.Request) (*Response, error) {
 	res, err := c.executer.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("can't execute %s request to '%s': %w", req.Method, req.URL, err)
 	}
 
-	return res, nil
+	if res == nil {
+		return nil, fmt.Errorf("executer return nil to %s request to '%s'", req.Method, req.URL)
+	}
+
+	return &Response{
+		Response: res,
+	}, nil
 }
