@@ -12,10 +12,13 @@ type RequestExecuter interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-// Client Allows you to perform http requests with a simple syntax
+// Client allows you to perform http requests with a simple syntax
 type Client struct {
 	executer RequestExecuter
 	baseURL  string
+
+	// newJsonDecoder stores a function to create a new json decoder
+	newJsonDecoder NewDecoder
 }
 
 func NewClient(configs ...ClientConfig) *Client {
@@ -55,11 +58,18 @@ func (c *Client) newRequest(ctx context.Context, url, method string, body io.Rea
 	return req, nil
 }
 
-func (c *Client) doRequest(req *http.Request) (*http.Response, error) {
+func (c *Client) doRequest(req *http.Request) (*Response, error) {
 	res, err := c.executer.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("can't execute %s request to '%s': %w", req.Method, req.URL, err)
 	}
 
-	return res, nil
+	if res == nil {
+		return nil, fmt.Errorf("executer return nil to %s request to '%s'", req.Method, req.URL)
+	}
+
+	return &Response{
+		Response: res,
+		client:   c,
+	}, nil
 }

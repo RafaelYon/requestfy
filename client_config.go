@@ -1,6 +1,8 @@
 package requestfy
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // ClientConfig is a function to configure the client
 type ClientConfig func(*Client)
@@ -19,9 +21,17 @@ func ConfigBaseURL(baseURL string) ClientConfig {
 	}
 }
 
+// ConfigJsonDecoder specifies a function to create a new JSON decoder
+func ConfigJsonDecoder(newDecoder NewDecoder) ClientConfig {
+	return func(c *Client) {
+		c.newJsonDecoder = newDecoder
+	}
+}
+
 // ConfigDefault configures the client with default options to allow quick start
 func ConfigDefault() ClientConfig {
 	return func(c *Client) {
 		c.executer = http.DefaultClient
+		c.newJsonDecoder = StdJsonDecoder
 	}
 }
