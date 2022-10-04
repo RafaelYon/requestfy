@@ -12,10 +12,13 @@ type RequestExecuter interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-// Client Allows you to perform http requests with a simple syntax
+// Client allows you to perform http requests with a simple syntax
 type Client struct {
 	executer RequestExecuter
 	baseURL  string
+
+	// newJsonDecoder stores a function to create a new json decoder
+	newJsonDecoder NewDecoder
 }
 
 func NewClient(configs ...ClientConfig) *Client {
@@ -67,5 +70,6 @@ func (c *Client) doRequest(req *http.Request) (*Response, error) {
 
 	return &Response{
 		Response: res,
+		client:   c,
 	}, nil
 }

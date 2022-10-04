@@ -17,36 +17,51 @@ func TestResponseJsonDecode(t *testing.T) {
 		},
 	}
 
-	client := requestfy.NewClient(
-		requestfy.ConfigRequestExecuter(stub),
-	)
-
-	res, err := client.Request().Get("https://swapi.dev/api/")
-
-	assertNoError(t, err)
-	if res == nil {
-		t.Fatal("expected non nil response, received nil")
+	testCases := []struct {
+		name    string
+		decoder requestfy.NewDecoder
+	}{
+		{
+			name:    "http.Json",
+			decoder: requestfy.StdJsonDecoder,
+		},
 	}
 
-	var endpoints map[string]string
-	assertNoError(t, res.Json(&endpoints))
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			client := requestfy.NewClient(
+				requestfy.ConfigRequestExecuter(stub),
+				requestfy.ConfigJsonDecoder(testCase.decoder),
+			)
 
-	if total := len(endpoints); total != 6 {
-		t.Errorf("expected 6 json decoded endpoints, received '%d'", total)
-	}
+			res, err := client.Request().Get("https://swapi.dev/api/")
 
-	expectedEndpoints := map[string]string{
-		"people":    "https://swapi.dev/api/people/",
-		"planets":   "https://swapi.dev/api/planets/",
-		"films":     "https://swapi.dev/api/films/",
-		"species":   "https://swapi.dev/api/species/",
-		"vehicles":  "https://swapi.dev/api/vehicles/",
-		"starships": "https://swapi.dev/api/starships/",
-	}
-	for expectedKey, expectedVal := range expectedEndpoints {
-		if val := endpoints[expectedKey]; val != expectedVal {
-			t.Errorf("expected '%s' endpoint in the key '%s', received '%s'", expectedVal, expectedKey, val)
-		}
+			assertNoError(t, err)
+			if res == nil {
+				t.Fatal("expected non nil response, received nil")
+			}
+
+			var endpoints map[string]string
+			assertNoError(t, res.Json(&endpoints))
+
+			if total := len(endpoints); total != 6 {
+				t.Errorf("expected 6 json decoded endpoints, received '%d'", total)
+			}
+
+			expectedEndpoints := map[string]string{
+				"people":    "https://swapi.dev/api/people/",
+				"planets":   "https://swapi.dev/api/planets/",
+				"films":     "https://swapi.dev/api/films/",
+				"species":   "https://swapi.dev/api/species/",
+				"vehicles":  "https://swapi.dev/api/vehicles/",
+				"starships": "https://swapi.dev/api/starships/",
+			}
+			for expectedKey, expectedVal := range expectedEndpoints {
+				if val := endpoints[expectedKey]; val != expectedVal {
+					t.Errorf("expected '%s' endpoint in the key '%s', received '%s'", expectedVal, expectedKey, val)
+				}
+			}
+		})
 	}
 }
 
