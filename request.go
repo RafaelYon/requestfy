@@ -57,3 +57,21 @@ func (r *Request) Head(url string) (*Response, error) {
 
 	return r.client.doRequest(req)
 }
+
+func (r *Request) Patch(url string) (*Response, error) {
+	req, err := r.client.newRequest(r.context, url, http.MethodPatch, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.client.doRequest(req)
+}
+
+func (r *Request) Options(url string) (*Response, error) {
+	req, err := r.client.newRequest(r.context, url, http.MethodOptions, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.client.doRequest(req)
+}

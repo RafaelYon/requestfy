@@ -68,6 +68,18 @@ func TestRequests(t *testing.T) {
 				return r.Head
 			},
 		},
+		{
+			http.MethodPatch,
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
+				return r.Patch
+			},
+		},
+		{
+			http.MethodOptions,
+			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
+				return r.Options
+			},
+		},
 	}
 	for _, test := range testCases {
 		t.Run(fmt.Sprintf("should make %s http request", test.expectedMethod), func(t *testing.T) {
