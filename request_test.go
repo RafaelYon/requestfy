@@ -41,10 +41,9 @@ func TestHeaders(t *testing.T) {
 					t.Error("headers are not equals")
 				}
 			}
-    	}
+		}
 	})
 }
-
 
 func TestRequests(t *testing.T) {
 	testCases := []struct {
@@ -83,14 +82,18 @@ func TestRequests(t *testing.T) {
 		},
 		{
 			http.MethodPatch,
-			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
-				return r.Patch
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return func(s string, body io.Reader) (*requestfy.Response, error) {
+					return r.Patch(s)
+				}
 			},
 		},
 		{
 			http.MethodOptions,
-			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
-				return r.Options
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return func(s string, body io.Reader) (*requestfy.Response, error) {
+					return r.Options(s)
+				}
 			},
 		},
 	}
