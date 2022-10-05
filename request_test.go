@@ -11,6 +11,40 @@ import (
 const fakeURL = "http://some-cool-domain.local"
 const path = "cool/path"
 
+func TestHeaders(t *testing.T) {
+	t.Run("should add headers to request", func(t *testing.T) {
+		cli := requestfy.NewClient()
+
+		testHeaders := map[string][]string{
+			"bar":  []string{"foo"},
+			"cool": []string{"header", "value"},
+		}
+
+		r := cli.Request()
+
+		for k, headers := range testHeaders {
+			for _, header := range headers {
+				r.SetHeader(k, header)
+			}
+		}
+
+		for k, wantedHeaders := range testHeaders {
+			currentHeaders, ok := r.GetHeaders()[k]
+
+			if !ok {
+				t.Errorf("cannot value for %s key header", k)
+			}
+
+			for _, wantedHeader := range wantedHeaders {
+				if !contains(currentHeaders, wantedHeader) {
+					t.Error("headers are not equals")
+				}
+			}
+    	}
+	})
+}
+
+
 func TestRequests(t *testing.T) {
 	testCases := []struct {
 		expectedMethod string
@@ -89,4 +123,13 @@ func assertRequestMethod(
 	if spy.lastRequest.Method != expectedMethod {
 		t.Errorf("expected '%s' method, used '%s'", expectedMethod, spy.lastRequest.Method)
 	}
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
