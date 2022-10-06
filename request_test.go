@@ -65,6 +65,12 @@ func TestRequests(t *testing.T) {
 			},
 		},
 		{
+			http.MethodPost,
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return r.Post
+			},
+		},
+		{
 			http.MethodDelete,
 			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
 				return func(s string, body io.Reader) (*requestfy.Response, error) {
