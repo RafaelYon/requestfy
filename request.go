@@ -2,6 +2,7 @@ package requestfy
 
 import (
 	"context"
+	"io"
 	"net/http"
 )
 
@@ -23,6 +24,26 @@ func (r *Request) Get(url string) (*Response, error) {
 		for _, val := range headers {
 			req.Header.Add(key, val)
 		}
+	}
+
+	return r.client.doRequest(req)
+}
+
+// Put performs a request using the PUT method
+func (r *Request) Put(url string, body io.Reader) (*Response, error) {
+	req, err := r.client.newRequest(r.context, url, http.MethodPut, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.client.doRequest(req)
+}
+
+// Post performs a request using the POST method
+func (r *Request) Post(url string, body io.Reader) (*Response, error) {
+	req, err := r.client.newRequest(r.context, url, http.MethodPost, body)
+	if err != nil {
+		return nil, err
 	}
 
 	return r.client.doRequest(req)

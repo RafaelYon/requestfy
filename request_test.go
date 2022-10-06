@@ -2,6 +2,7 @@ package requestfy_test
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
 
@@ -75,36 +76,58 @@ func TestMapHeaders(t *testing.T) {
 func TestRequests(t *testing.T) {
 	testCases := []struct {
 		expectedMethod string
-		method         func(*requestfy.Request) func(string) (*requestfy.Response, error)
+		method         func(*requestfy.Request) func(string, io.Reader) (*requestfy.Response, error)
 	}{
 		{
 			http.MethodGet,
-			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
-				return r.Get
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return func(s string, body io.Reader) (*requestfy.Response, error) {
+					return r.Get(s)
+				}
+			},
+		},
+		{
+			http.MethodPut,
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return r.Put
+			},
+		},
+		{
+			http.MethodPost,
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return r.Post
 			},
 		},
 		{
 			http.MethodDelete,
-			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
-				return r.Delete
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return func(s string, body io.Reader) (*requestfy.Response, error) {
+					return r.Delete(s)
+				}
 			},
 		},
 		{
 			http.MethodHead,
-			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
-				return r.Head
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return func(s string, body io.Reader) (*requestfy.Response, error) {
+					return r.Head(s)
+				}
 			},
 		},
 		{
 			http.MethodPatch,
-			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
-				return r.Patch
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return func(s string, body io.Reader) (*requestfy.Response, error) {
+					return r.Patch(s)
+				}
 			},
 		},
 		{
 			http.MethodOptions,
-			func(r *requestfy.Request) func(string) (*requestfy.Response, error) {
-				return r.Options
+			func(r *requestfy.Request) func(string, io.Reader) (*requestfy.Response, error) {
+				return func(s string, body io.Reader) (*requestfy.Response, error) {
+					return r.Options(s)
+				}
 			},
 		},
 	}
@@ -116,7 +139,7 @@ func TestRequests(t *testing.T) {
 				requestfy.ConfigBaseURL(fakeURL),
 			)
 
-			res, err := test.method(client.Request())(path)
+			res, err := test.method(client.Request())(path, nil)
 			assertRequestMethod(t, spy, res, err, test.expectedMethod)
 		})
 	}
