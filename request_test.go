@@ -45,6 +45,34 @@ func TestHeaders(t *testing.T) {
 	})
 }
 
+func TestMapHeaders(t *testing.T) {
+	t.Run("should set headers by map", func(t *testing.T) {
+		cli := requestfy.NewClient()
+
+		testHeaders := http.Header{
+			"bar":           []string{"foo", "cool"},
+			"header1":       []string{"val1", "val2", "val3"},
+			"Authorization": []string{"bearer ..."},
+		}
+
+		r := cli.Request().SetHeaders(testHeaders)
+
+		for k, wantedHeaders := range testHeaders {
+			currentHeaders, ok := r.GetHeaders()[k]
+
+			if !ok {
+				t.Errorf("cannot value for %s key header", k)
+			}
+
+			for _, wantedHeader := range wantedHeaders {
+				if !contains(currentHeaders, wantedHeader) {
+					t.Error("headers are not equals")
+				}
+			}
+		}
+	})
+}
+
 func TestRequests(t *testing.T) {
 	testCases := []struct {
 		expectedMethod string

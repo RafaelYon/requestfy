@@ -55,6 +55,16 @@ func (r *Request) SetHeader(h, v string) *Request {
 	return r
 }
 
+func (r *Request) SetHeaders(headers http.Header) *Request {
+	for key, vals := range headers {
+		for _, val := range vals {
+			r.SetHeader(key, val)
+		}
+	}
+
+	return r
+}
+
 func (r *Request) GetHeaders() http.Header {
 	return r.headers
 }
