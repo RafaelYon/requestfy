@@ -28,9 +28,18 @@ func (r *Request) Get(url string) (*Response, error) {
 	return r.client.doRequest(req)
 }
 
-
 func (r *Request) SetHeader(h, v string) *Request {
 	r.headers[h] = append(r.headers[h], v)
+
+	return r
+}
+
+func (r *Request) SetHeaders(headers http.Header) *Request {
+	for key, vals := range headers {
+		for _, val := range vals {
+			r.SetHeader(key, val)
+		}
+	}
 
 	return r
 }
