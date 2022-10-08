@@ -145,6 +145,33 @@ func TestRequests(t *testing.T) {
 	}
 }
 
+func TestQueryParams(t *testing.T) {
+	t.Run("should add params in url", func(t *testing.T) {
+		spy := &spyRequestExecutor{}
+		client := requestfy.NewClient(
+			requestfy.ConfigRequestExecuter(spy),
+			requestfy.ConfigBaseURL(fakeURL),
+		)
+
+		r := client.Request().
+			SetParam("bar", "foo").
+			SetParam("query", "string")
+
+		res, err := r.Get(path)
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		urlExpected := fmt.Sprintf("%s/%s?bar=foo&query=string", fakeURL, path)
+		url := res.Response.Request.URL.String()
+
+		if url != urlExpected {
+			t.Errorf("url expected: %s but got %s", urlExpected, url)
+		}
+	})
+}
+
 type spyRequestExecutor struct {
 	lastRequest *http.Request
 }
@@ -154,6 +181,7 @@ func (s *spyRequestExecutor) Do(req *http.Request) (*http.Response, error) {
 
 	return &http.Response{
 		StatusCode: http.StatusOK,
+		Request:    req,
 	}, nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 // Request stores and facilitates configuration of requests
@@ -11,6 +12,7 @@ type Request struct {
 	context context.Context
 	client  *Client
 	headers http.Header
+	params  url.Values
 }
 
 // Get performs a request using the GET method
@@ -26,6 +28,8 @@ func (r *Request) Get(url string) (*Response, error) {
 		}
 	}
 
+	r.buildQueryParams(req.URL)
+
 	return r.client.doRequest(req)
 }
 
@@ -36,6 +40,8 @@ func (r *Request) Put(url string, body io.Reader) (*Response, error) {
 		return nil, err
 	}
 
+	r.buildQueryParams(req.URL)
+
 	return r.client.doRequest(req)
 }
 
@@ -45,6 +51,8 @@ func (r *Request) Post(url string, body io.Reader) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	r.buildQueryParams(req.URL)
 
 	return r.client.doRequest(req)
 }
@@ -85,6 +93,8 @@ func (r *Request) Head(url string) (*Response, error) {
 		return nil, err
 	}
 
+	r.buildQueryParams(req.URL)
+
 	return r.client.doRequest(req)
 }
 
@@ -93,6 +103,8 @@ func (r *Request) Patch(url string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	r.buildQueryParams(req.URL)
 
 	return r.client.doRequest(req)
 }
@@ -103,5 +115,17 @@ func (r *Request) Options(url string) (*Response, error) {
 		return nil, err
 	}
 
+	r.buildQueryParams(req.URL)
+
 	return r.client.doRequest(req)
+}
+
+func (r *Request) SetParam(k, v string) *Request {
+	r.params[k] = append(r.params[k], v)
+
+	return r
+}
+
+func (r *Request) buildQueryParams(u *url.URL) {
+	u.RawQuery = r.params.Encode()
 }

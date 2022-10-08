@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 // RequestExecuter abstracts the http client used behind the scenes to perform HTTP requests
@@ -42,6 +43,7 @@ func (c *Client) RequestWithContext(ctx context.Context) *Request {
 		client:  c,
 		context: ctx,
 		headers: make(http.Header),
+		params:  make(url.Values),
 	}
 }
 
